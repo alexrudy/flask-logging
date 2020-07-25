@@ -1,0 +1,129 @@
+import logging.config
+import time
+import uuid
+from typing import Any
+from typing import Dict
+
+from flask import current_app
+from flask import Flask
+from flask import g
+from flask import has_app_context
+from flask import has_request_context
+from flask import request
+from flask import request_finished
+from flask import request_started
+from flask import Response
+
+from .request_context import request_context_manger
+from .request_context import RequestContextGenerator
+
+__all__ = ["FlaskAppInformation", "RequestInformation", "init_app", "log_request", "log_response"]
+
+
+class FlaskAppInformation(logging.Filter):
+    """
+    Add information about the flask app and configuration
+    """
+
+    def filter(self, log_record: Any) -> bool:
+        if has_app_context():
+            log_record.flask = dict(
+                environment=current_app.env, instance_path=current_app.instance_path, name=current_app.name
+            )
+        return True
+
+
+class RequestInformation(logging.Filter):
+    """
+    Add request information to log records
+    """
+
+    def filter(self, log_record: Any) -> bool:
+        """Enrich log records with request infomration"""
+        if has_request_context():
+
+            log_record.request = {
+                "id": g.request_id,
+                "path": request.path,
+                "method": request.method,
+                "remote_addr": request.remote_addr,
+                "user_agent": request.user_agent,
+            }
+
+            log_record.url = request.path
+            log_record.method = request.method
+            log_record.remote_addr = request.remote_addr
+
+        else:
+            log_record.request = None
+            log_record.url = None
+            log_record.method = None
+            log_record.remote_addr = None
+
+        return True
+
+
+def log_request(sender: Flask, **extra: Any) -> None:
+    """
+    Log the start of a request to a flask app.
+    """
+    logger = sender.logger.getChild("reqeust")
+    logger.debug(f"{request.method} {request.url} BEGIN", extra={"event": "request_started"})
+
+
+def log_response(sender: Flask, response: Response, **extra: Any) -> None:
+    """
+    Log a response form the app.
+
+    Should be attached to the `request_finished` signal.
+    """
+    log = sender.logger.getChild("request")
+
+    response_keywords: Dict[str, Any] = {}
+    response_keywords["status"] = response.status
+    response_keywords["status_code"] = response.status_code
+    response_keywords["content_type"] = response.content_type
+    response_keywords["request_duration"] = g._request_duration
+
+    log.info(f"{response.status}", extra=dict(response=response_keywords, event="request_finished"))
+
+
+@request_context_manger
+def request_set_id() -> RequestContextGenerator:
+    """
+    Set a UUID in the header for each request.
+    """
+    request_id = request.headers.get("X-Request-ID", None)
+    if request_id is None:
+        request_id = str(uuid.uuid4())
+
+    g.setdefault("request_id", request_id)
+    response = yield
+    response.headers.setdefault("X-Request-ID", g.request_id)
+    return response
+
+
+@request_context_manger
+def request_track_time() -> RequestContextGenerator:
+    """
+    Track the duration of each request.
+    """
+    start_time = time.monotonic()
+    response = yield
+    duration = time.monotonic() - start_time
+    g._request_duration = duration
+    return response
+
+
+def init_app(app: Flask) -> None:
+    """
+    Activate customized logging functions
+    """
+    request_set_id.init_app(app)
+    request_track_time.init_app(app)
+
+    request_finished.connect(log_response, app)
+    request_started.connect(log_request, app)
+
+    app.logger.getChild("request").addFilter(RequestInformation())
+    app.logger.getChild("request").addFilter(FlaskAppInformation())
