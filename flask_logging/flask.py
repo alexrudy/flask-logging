@@ -67,7 +67,9 @@ def log_request(sender: Flask, **extra: Any) -> None:
     """
     Log the start of a request to a flask app.
     """
-    logger = sender.logger.getChild("reqeust")
+    logger_name = sender.config.get("FLASK_LOGGING_REQUEST_LOGGER_NAME", "request")
+
+    logger = sender.logger.getChild(logger_name)
     logger.debug(f"{request.method} {request.url} BEGIN", extra={"event": "request_started"})
 
 
@@ -77,15 +79,18 @@ def log_response(sender: Flask, response: Response, **extra: Any) -> None:
 
     Should be attached to the `request_finished` signal.
     """
-    log = sender.logger.getChild("request")
+    logger_name = sender.config.get("FLASK_LOGGING_REQUEST_LOGGER_NAME", "request")
+    logger = sender.logger.getChild(logger_name)
 
     response_keywords: Dict[str, Any] = {}
     response_keywords["status"] = response.status
     response_keywords["status_code"] = response.status_code
     response_keywords["content_type"] = response.content_type
-    response_keywords["request_duration"] = g._request_duration
 
-    log.info(f"{response.status}", extra=dict(response=response_keywords, event="request_finished"))
+    if "_request_duration" in g:
+        response_keywords["request_duration"] = g._request_duration
+
+    logger.info(f"{response.status}", extra=dict(response=response_keywords, event="request_finished"))
 
 
 @request_context_manger
@@ -93,13 +98,16 @@ def request_set_id() -> RequestContextGenerator:
     """
     Set a UUID in the header for each request.
     """
-    request_id = request.headers.get("X-Request-ID", None)
+
+    request_header = current_app.config.get("FLASK_LOGGING_REQUEST_ID_HEADER", "X-Request-ID")
+
+    request_id = request.headers.get(request_header, None)
     if request_id is None:
         request_id = str(uuid.uuid4())
 
     g.setdefault("request_id", request_id)
     response = yield
-    response.headers.setdefault("X-Request-ID", g.request_id)
+    response.headers.setdefault(request_header, g.get("request_id", request_id))
     return response
 
 
