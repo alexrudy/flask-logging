@@ -1,35 +1,12 @@
-import dataclasses as dc
 import json
 import logging
 import uuid
-from typing import Any
 
 import pytest
 
 from flask_logging import ClickStyleFormatter
 from flask_logging import JSONFormatter
 from flask_logging import LogLevelDict
-
-
-Caplog = Any
-
-
-@pytest.fixture(params=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
-def loglevel(request: Any) -> str:
-    return request.param
-
-
-@pytest.fixture
-def record(loglevel: str) -> logging.LogRecord:
-    return logging.LogRecord(
-        name="test.log",
-        level=getattr(logging, loglevel.upper()),
-        pathname=__file__,
-        lineno=10,
-        msg="Some message here!",
-        args=(),
-        exc_info=None,
-    )
 
 
 def test_loglevel_dict() -> None:
@@ -68,25 +45,8 @@ def test_formatter(record: logging.LogRecord) -> None:
 
     msg = fmt.format(record)
 
+    # TODO Properly test that this message contains ANSI escape codes
     assert msg != f"[{logging.getLevelName(record.levelno)}] Some message here!"
-
-
-@dc.dataclass
-class LogWatcher:
-    """A custom log capturing utility which can automatically filter things"""
-
-    caplog: Caplog
-
-    def last(self, logger: str) -> logging.LogRecord:
-        for record in reversed(self.caplog.records):
-            if record.name == logger:
-                return record
-        raise AssertionError("Request logging message not found!")
-
-
-@pytest.fixture
-def watchlog(caplog):
-    yield LogWatcher(caplog)
 
 
 def test_request_logging(client, watchlog):
