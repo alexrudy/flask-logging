@@ -1,3 +1,4 @@
+import dataclasses as dc
 import json
 import logging
 import uuid
@@ -7,6 +8,9 @@ import pytest
 from flask_logging import ClickStyleFormatter
 from flask_logging import JSONFormatter
 from flask_logging import LogLevelDict
+
+
+Caplog = Any
 
 
 @pytest.fixture(params=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
@@ -66,29 +70,41 @@ def test_formatter(record: logging.LogRecord) -> None:
     assert msg != f"[{logging.getLevelName(record.levelno)}] Some message here!"
 
 
-def find_last_request_log(records, name="test-flask-logging.request"):
-    for record in reversed(records):
-        if record.name == name:
-            return record
-    else:  # pragma: no cover
+@dc.dataclass
+class LogWatcher:
+    """A custom log capturing utility which can automatically filter things"""
+
+    caplog: Caplog
+
+    def last(self, logger: str) -> logging.LogRecord:
+        for record in reversed(self.caplog.records):
+            if record.name == logger:
+                return record
         raise AssertionError("Request logging message not found!")
 
 
-def test_request_logging(client, caplog):
+@pytest.fixture
+def watchlog(caplog):
+    yield LogWatcher(caplog)
+
+
+def test_request_logging(client, watchlog):
+    """Request logging should include the request ID"""
     rid = str(uuid.uuid4())
 
     _ = client.get("/", headers={"X-Request-ID": rid})
-    record = find_last_request_log(caplog.records)
+    record = watchlog.last("test-flask-logging.request")
     assert record.url == "/"
     assert record.method == "GET"
     assert record.response["status_code"] == 200
     assert record.request["id"] == rid
 
 
-def test_request_log_jsonfmt(client, caplog):
-
+def test_request_log_jsonfmt(client, watchlog):
+    """Logging should properly produce a nested JSON object with
+    the custom JSON formatter"""
     _ = client.get("/")
-    record = find_last_request_log(caplog.records)
+    record = watchlog.last("test-flask-logging.request")
 
     formatter = JSONFormatter()
     data = json.loads(formatter.format(record))
@@ -96,10 +112,10 @@ def test_request_log_jsonfmt(client, caplog):
     assert data["logger"]["name"] == "test-flask-logging.request"
 
 
-def test_request_log_timing(client, caplog):
-
+def test_request_log_timing(client, watchlog):
+    """Request logging should include request timing"""
     _ = client.get("/")
-    record = find_last_request_log(caplog.records)
+    record = watchlog.last("test-flask-logging.request")
 
     duration = record.response["request_duration"]
 
@@ -107,8 +123,8 @@ def test_request_log_timing(client, caplog):
     assert duration > 0.0
 
 
-def test_request_log_appinfo(client, caplog):
-
+def test_request_log_appinfo(client, watchlog):
+    """Flask application info should be on the log record"""
     _ = client.get("/")
-    record = find_last_request_log(caplog.records)
+    record = watchlog.last("test-flask-logging.request")
     assert record.flask["environment"] == "test"

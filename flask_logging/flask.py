@@ -43,12 +43,13 @@ class RequestInformation(logging.Filter):
         if has_request_context():
 
             log_record.request = {
-                "id": g.request_id,
                 "path": request.path,
                 "method": request.method,
                 "remote_addr": request.remote_addr,
                 "user_agent": request.user_agent,
             }
+            if hasattr(g, "request_id"):
+                log_record.request["id"] = g.request_id
 
             log_record.url = request.path
             log_record.method = request.method
