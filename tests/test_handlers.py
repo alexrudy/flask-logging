@@ -5,6 +5,7 @@ import uuid
 from typing import Any
 
 import pytest
+
 from flask_logging import ClickStyleFormatter
 from flask_logging import JSONFormatter
 from flask_logging import LogLevelDict

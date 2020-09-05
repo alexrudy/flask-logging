@@ -1,5 +1,6 @@
 import pytest
 from flask import Flask
+
 from flask_logging.flask import init_app
 
 

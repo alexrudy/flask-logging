@@ -62,7 +62,7 @@ class ProgressReporter(Generic[T]):
     def __post_init__(self) -> None:
 
         if self.total == -1:
-            # Accept the type error here – this iterator wrapper isn't actually useful
+            # Accept the type error here - this iterator wrapper isn't actually useful
             # if we can't know the total number of items we are iterating over.
             self.total = len(self.iterator)  # type: ignore
 
