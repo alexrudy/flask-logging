@@ -11,9 +11,22 @@ repos:
     -   id: blacken-docs
         additional_dependencies: [black==19.3b0]
         language_version: python3
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.5.1
     hooks:
+    -   id: python-use-type-annotations
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.770
+    hooks:
+    -   id: mypy
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.5.0
+    hooks:
+    -   id: check-docstring-first
+    -   id: debug-statements
+    -   id: name-tests-test
+        args: ['--django']
+    -   id: requirements-txt-fixer
     -   id: trailing-whitespace
         language_version: python3
     -   id: end-of-file-fixer
@@ -26,17 +39,17 @@ repos:
     -   id: debug-statements
         language_version: python3
 -   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.7
+    rev: 3.8.0
     hooks:
     -   id: flake8
-        language_version: python3
+        additional_dependencies: ['flake8-typing-imports==1.9.0']
 -   repo: https://github.com/asottile/reorder_python_imports
-    rev: v1.8.0
+    rev: v2.3.5
     hooks:
     -   id: reorder-python-imports
-        args: [--py3-plus, '--application-directories=src']
+        args: [--py3-plus]
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v1.18.0
+    rev: v2.4.1
     hooks:
     -   id: pyupgrade
         args: [--py3-plus]
