@@ -11,7 +11,7 @@ def test_formatter_empty(record: logging.LogRecord) -> None:
 
     msg = fmt.format(record)
 
-    assert msg == '- - - [05/Sep/2020 12:49:32] "- - -" - -'
+    assert msg == '- - - [05/Sep/2020 19:49:32] "- - -" - -'
 
 
 @pytest.fixture
@@ -25,4 +25,4 @@ def test_formatter_request(request_record: logging.LogRecord) -> None:
 
     msg = fmt.format(request_record)
 
-    assert msg == '127.0.0.1 - - [05/Sep/2020 12:49:32] "GET / HTTP/1.1" - -'
+    assert msg == '127.0.0.1 - - [05/Sep/2020 19:49:32] "GET / HTTP/1.1" - -'

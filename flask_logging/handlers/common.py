@@ -26,7 +26,7 @@ def format_apache_clf_timestamp(timestamp: int) -> str:
 
     monthname = [None, "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-    when = dt.datetime.fromtimestamp(timestamp)
+    when = dt.datetime.utcfromtimestamp(timestamp)
 
     s = "%02d/%3s/%04d %02d:%02d:%02d" % (
         when.day,
