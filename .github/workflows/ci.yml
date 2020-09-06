@@ -46,9 +46,9 @@ jobs:
         id: cache
         with:
           path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          key: poetry-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
           restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock') }}
+            poetry-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
 
       - name: Set Poetry config
         run: |
