@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "flask-logging"
+name = "flask-logging-helpers"
 version = "0.1.0"
 description = "Logging tools for flask"
 authors = ["Alex Rudy <opensource@alexrudy.net>"]
