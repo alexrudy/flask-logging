@@ -10,14 +10,12 @@ from flask import g
 from flask import has_app_context
 from flask import has_request_context
 from flask import request
-from flask import request_finished
-from flask import request_started
 from flask import Response
 
 from .request_context import request_context_manger
 from .request_context import RequestContextGenerator
 
-__all__ = ["FlaskAppInformation", "RequestInformation", "init_app", "log_request", "log_response"]
+__all__ = ["FlaskAppInformation", "RequestInformation", "log_request", "log_response"]
 
 
 class FlaskAppInformation(logging.Filter):
@@ -129,21 +127,3 @@ def request_track_time() -> RequestContextGenerator:
     duration = time.monotonic() - start_time
     g._request_duration = duration
     return response
-
-
-def init_app(app: Flask) -> None:
-    """
-    Activate customized logging functions
-    """
-    request_set_id.init_app(app)
-    request_track_time.init_app(app)
-
-    request_finished.connect(log_response, app)
-    request_started.connect(log_request, app)
-
-    names = {app.config.get(f"FLASK_LOGGING_{name.upper()}_LOGGER_NAME", name) for name in ("request", "response")}
-
-    for name in names:
-        logger = app.logger.getChild(name)
-        logger.addFilter(RequestInformation())
-        logger.addFilter(FlaskAppInformation())
