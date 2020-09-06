@@ -2,6 +2,7 @@ import dataclasses as dc
 import logging
 from typing import Any
 from typing import Iterator
+from typing import List
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -41,6 +42,9 @@ class LogWatcher:
             if record.name == logger:
                 return record
         raise AssertionError(f"Log message for {logger} not found!")  # pragma: nocover
+
+    def filter(self, logger: str) -> List[logging.LogRecord]:
+        return [record for record in self.caplog.records if record.name == logger]
 
 
 @pytest.fixture
