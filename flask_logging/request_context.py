@@ -89,13 +89,20 @@ class RequestContextWrapper:
 
     def _after_request(self, response: Response) -> Response:
         state = self._get_state()
-        ctx = state.context_wrappers.pop(self)
+
+        try:
+            ctx = state.context_wrappers.pop(self)
+        except KeyError:
+            # Can't find this context, so we don't modify the response and just return it here.
+            return response
 
         try:
             ctx.send(response)
         except StopIteration as e:
             if isinstance(e.value, Response):
                 response = e.value
+            elif e.value is not None:
+                raise RuntimeError(f"Generator returned something which is not a response: {type(e.value)}")
         else:
             raise RuntimeError("Generator did not stop")
         return response
