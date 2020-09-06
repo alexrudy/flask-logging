@@ -1,5 +1,6 @@
 import dataclasses as dc
 import logging
+from pathlib import Path
 from typing import Any
 from typing import Iterator
 
@@ -8,13 +9,16 @@ from _pytest.logging import LogCaptureFixture
 from flask import Flask
 from flask.testing import FlaskClient
 
-from flask_logging.flask import init_app
+from flask_logging import FlaskLogging
 
 
 @pytest.fixture
 def app() -> Iterator[Flask]:
     test_app = Flask("test-flask-logging")
     test_app.env = "test"
+
+    test_cfg = Path(__file__).parent / "configuration.cfg"
+    test_app.config.from_pyfile(test_cfg)
 
     @test_app.route("/")
     def home():
@@ -25,7 +29,8 @@ def app() -> Iterator[Flask]:
 
 @pytest.fixture
 def client(app: Flask) -> Iterator[FlaskClient]:
-    init_app(app)
+    extension = FlaskLogging()
+    extension.init_app(app)
     with app.test_client() as c:
         yield c
 

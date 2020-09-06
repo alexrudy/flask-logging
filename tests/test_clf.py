@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 from flask import Flask
 
-from flask_logging.flask import init_app
+from flask_logging.core import FlaskLogging
 from flask_logging.handlers.common import CommonLogFormat
 
 
@@ -48,7 +48,8 @@ def test_formatter_response(response_record: logging.LogRecord) -> None:
 def test_response_live_app(app: Flask, watchlog: Any, timestamp: int) -> None:
     """Test response logging on a live app"""
     app.config["FLASK_LOGGING_RESPONSE_LOGGER_NAME"] = "test-response-logger"
-    init_app(app)
+
+    FlaskLogging(app=app)
 
     with app.test_client() as client:
         _ = client.get("/")
