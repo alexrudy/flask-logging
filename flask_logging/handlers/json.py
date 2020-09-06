@@ -83,9 +83,7 @@ class JSONFormatter(logging.Formatter):
     def _convert_json_data(self, record: logging.LogRecord) -> Dict[str, Any]:
         data: Dict[str, Any] = {}
         for key, value in record.__dict__.items():
-            result = data[key] = self._convert_json_value(value, key=key, logger=record.name)
-            if result is None and value is not None:
-                warnings.warn(JSONLogWarning(f"Unable to marshal type {type(value)} for key {key} to JSON"))
+            data[key] = self._convert_json_value(value, key=key, logger=record.name)
 
         data["message"] = {"text": data.pop("msg"), "args": data.pop("args")}
 
