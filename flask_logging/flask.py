@@ -48,6 +48,9 @@ class RequestInformation(logging.Filter):
                 "remote_addr": request.remote_addr,
                 "user_agent": request.user_agent,
             }
+            if "SERVER_PROTOCOL" in request.environ:
+                log_record.request["protocol"] = request.environ["SERVER_PROTOCOL"]
+
             if hasattr(g, "request_id"):
                 log_record.request["id"] = g.request_id
 
@@ -80,13 +83,17 @@ def log_response(sender: Flask, response: Response, **extra: Any) -> None:
 
     Should be attached to the `request_finished` signal.
     """
-    logger_name = sender.config.get("FLASK_LOGGING_REQUEST_LOGGER_NAME", "request")
+    logger_name = sender.config.get("FLASK_LOGGING_RESPONSE_LOGGER_NAME", "response")
     logger = sender.logger.getChild(logger_name)
 
     response_keywords: Dict[str, Any] = {}
     response_keywords["status"] = response.status
     response_keywords["status_code"] = response.status_code
     response_keywords["content_type"] = response.content_type
+
+    content_length = response.content_length
+    if content_length is not None:
+        response_keywords["content_length"] = content_length
 
     if "_request_duration" in g:
         response_keywords["request_duration"] = g._request_duration
@@ -134,5 +141,9 @@ def init_app(app: Flask) -> None:
     request_finished.connect(log_response, app)
     request_started.connect(log_request, app)
 
-    app.logger.getChild("request").addFilter(RequestInformation())
-    app.logger.getChild("request").addFilter(FlaskAppInformation())
+    names = {app.config.get(f"FLASK_LOGGING_{name.upper()}_LOGGER_NAME", name) for name in ("request", "response")}
+
+    for name in names:
+        logger = app.logger.getChild(name)
+        logger.addFilter(RequestInformation())
+        logger.addFilter(FlaskAppInformation())

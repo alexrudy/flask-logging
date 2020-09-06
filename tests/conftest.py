@@ -40,7 +40,12 @@ class LogWatcher:
         for record in reversed(self.caplog.records):
             if record.name == logger:
                 return record
-        raise AssertionError("Request logging message not found!")
+        raise AssertionError(f"Log message for {logger} not found!")
+
+
+@pytest.fixture
+def timestamp():
+    return 1599335372
 
 
 @pytest.fixture
@@ -54,7 +59,7 @@ def loglevel(request: Any) -> str:
 
 
 @pytest.fixture
-def record(loglevel: str) -> logging.LogRecord:
+def record(loglevel: str, timestamp: int) -> logging.LogRecord:
     r = logging.LogRecord(
         name="test.log",
         level=getattr(logging, loglevel.upper()),
@@ -65,8 +70,8 @@ def record(loglevel: str) -> logging.LogRecord:
         exc_info=None,
     )
 
-    r.created = 1599335372
+    r.created = timestamp
     r.msecs = 295
-    r.relativeCreated = 1599335370
+    r.relativeCreated = timestamp - 62
 
     return r
