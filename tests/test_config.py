@@ -26,7 +26,7 @@ def configuration(request: FixtureRequest, mode: str) -> Union[str, Path]:
         with request.param.open("r") as stream:
             return yaml.safe_load(stream)
     else:
-        raise ValueError(mode)
+        raise ValueError(mode)  # pragma: nocover
 
 
 def test_configure(configuration: Union[str, Path]) -> None:
