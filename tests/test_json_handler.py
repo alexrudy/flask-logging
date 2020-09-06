@@ -45,7 +45,7 @@ def test_log_jsonfmt_warning(record, recwarn):
 
     assert len(recwarn) == 1
     warning = recwarn.pop(JSONLogWarning)
-    assert str(warning.message) == "Unable to marshal type <class 'object'> to JSON [key=my_attr, logger=test.log]"
+    assert str(warning.message) == "Unable to marshal type <class 'object'> to JSON"
 
 
 class MockSchema:

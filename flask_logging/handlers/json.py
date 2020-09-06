@@ -8,7 +8,6 @@ import warnings
 from typing import Any
 from typing import Callable
 from typing import Dict
-from typing import Optional
 from typing import Tuple
 from typing import Type
 from typing import Union
@@ -33,10 +32,8 @@ class HasSchema(abc.ABC):
         return NotImplemented
 
 
-class JSONFormatter(logging.Formatter):
-    """
-    Format log records as JSON
-    """
+class FlexJSONEncoder(json.JSONEncoder):
+    """Flexible JSON encoder for use with more JSON types"""
 
     converters: Dict[Union[Type, Tuple[Type]], Callable[[Any], Any]] = {
         dt.datetime: lambda value: value.isoformat(),
@@ -48,6 +45,21 @@ class JSONFormatter(logging.Formatter):
         LocalProxy: repr,
     }
 
+    def default(self, obj: Any) -> Any:
+        for clses, func in self.converters.items():
+            if isinstance(obj, clses):
+                return func(obj)
+        else:
+            warnings.warn(JSONLogWarning(f"Unable to marshal type {type(obj)} to JSON"))
+            return f"<Unecodeable type: {type(obj)!r} {obj!r}>"
+        return super().default(obj)
+
+
+class JSONFormatter(logging.Formatter):
+    """
+    Format log records as JSON
+    """
+
     def format(self, record: logging.LogRecord) -> str:
         """
         Format a record for output
@@ -56,34 +68,14 @@ class JSONFormatter(logging.Formatter):
         if ei:
             _ = super().format(record)  # just to get traceback text into record.exc_text
             record.exc_info = None  # to avoid Unpickleable error
-        s = json.dumps(self._convert_json_data(record))
+        s = json.dumps(self._convert_json_data(record), sort_keys=True, cls=FlexJSONEncoder)
         if ei:
             record.exc_info = ei  # for next handler
         return s
 
-    def _convert_json_value(self, value: Any, key: Optional[str] = None, logger: Optional[str] = None) -> Any:
-        data: Any = None
-        if isinstance(value, (str, int, float, bool, type(None))):
-            data = value
-        elif isinstance(value, (tuple, list)):
-            data = [self._convert_json_value(v, key=f"{key}.<list>", logger=logger) for v in value]
-        elif isinstance(value, dict):
-            data = {k: self._convert_json_value(v, key=f"{key}.{k}", logger=logger) for k, v in value.items()}
-        else:
-            for clses, func in self.converters.items():
-                if isinstance(value, clses):
-                    data = func(value)
-                    break
-            else:
-                warnings.warn(
-                    JSONLogWarning(f"Unable to marshal type {type(value)} to JSON [key={key}, logger={logger}]")
-                )
-        return data
-
     def _convert_json_data(self, record: logging.LogRecord) -> Dict[str, Any]:
         data: Dict[str, Any] = {}
-        for key, value in record.__dict__.items():
-            data[key] = self._convert_json_value(value, key=key, logger=record.name)
+        data.update(record.__dict__)
 
         data["message"] = {"text": data.pop("msg"), "args": data.pop("args")}
 
