@@ -40,7 +40,7 @@ class LogWatcher:
         for record in reversed(self.caplog.records):
             if record.name == logger:
                 return record
-        raise AssertionError(f"Log message for {logger} not found!")
+        raise AssertionError(f"Log message for {logger} not found!")  # pragma: nocover
 
 
 @pytest.fixture

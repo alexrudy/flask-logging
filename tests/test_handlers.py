@@ -1,10 +1,8 @@
-import json
 import logging
 
 import pytest
 
 from flask_logging import ClickStyleFormatter
-from flask_logging import JSONFormatter
 from flask_logging import LogLevelDict
 
 
@@ -46,15 +44,3 @@ def test_formatter(record: logging.LogRecord) -> None:
 
     # TODO Properly test that this message contains ANSI escape codes
     assert msg != f"[{logging.getLevelName(record.levelno)}] Some message here!"
-
-
-def test_request_log_jsonfmt(client, watchlog):
-    """Logging should properly produce a nested JSON object with
-    the custom JSON formatter"""
-    _ = client.get("/")
-    record = watchlog.last("test-flask-logging.response")
-
-    formatter = JSONFormatter()
-    data = json.loads(formatter.format(record))
-
-    assert data["logger"]["name"] == "test-flask-logging.response"
