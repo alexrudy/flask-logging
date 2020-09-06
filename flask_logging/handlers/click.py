@@ -9,7 +9,7 @@ from typing import Union
 
 import click
 
-from ..config import LogLevelDict
+from ..loglevel import LogLevelDict
 
 __all__ = ["ClickStyleFormatter", "ClickStreamHandler", "StreamMode"]
 
