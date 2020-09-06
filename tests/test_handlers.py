@@ -1,6 +1,5 @@
 import json
 import logging
-import uuid
 
 import pytest
 
@@ -49,18 +48,6 @@ def test_formatter(record: logging.LogRecord) -> None:
     assert msg != f"[{logging.getLevelName(record.levelno)}] Some message here!"
 
 
-def test_request_logging(client, watchlog):
-    """Request logging should include the request ID"""
-    rid = str(uuid.uuid4())
-
-    _ = client.get("/", headers={"X-Request-ID": rid})
-    record = watchlog.last("test-flask-logging.response")
-    assert record.url == "/"
-    assert record.method == "GET"
-    assert record.response["status_code"] == 200
-    assert record.request["id"] == rid
-
-
 def test_request_log_jsonfmt(client, watchlog):
     """Logging should properly produce a nested JSON object with
     the custom JSON formatter"""
@@ -71,21 +58,3 @@ def test_request_log_jsonfmt(client, watchlog):
     data = json.loads(formatter.format(record))
 
     assert data["logger"]["name"] == "test-flask-logging.response"
-
-
-def test_request_log_timing(client, watchlog):
-    """Request logging should include request timing"""
-    _ = client.get("/")
-    record = watchlog.last("test-flask-logging.response")
-
-    duration = record.response["request_duration"]
-
-    assert isinstance(duration, float)
-    assert duration > 0.0
-
-
-def test_request_log_appinfo(client, watchlog):
-    """Flask application info should be on the log record"""
-    _ = client.get("/")
-    record = watchlog.last("test-flask-logging.request")
-    assert record.flask["environment"] == "test"
