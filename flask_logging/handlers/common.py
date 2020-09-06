@@ -11,10 +11,12 @@ class CommonLogFormat(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         timestamp = format_apache_clf_timestamp(record.created)
         request: DefaultDict[str, str] = defaultdict(lambda: "-", **getattr(record, "request", {}))
+        response: DefaultDict[str, str] = defaultdict(lambda: "-", **getattr(record, "response", {}))
 
         return (
-            f"{request['remote_addr']} - - [{timestamp}] \"{self.request_format(request)}\""
-            f" {request['code']} {request['size']}"
+            f"{request['remote_addr']} {request['user_id']} {request['username']} [{timestamp}]"
+            f' "{self.request_format(request)}"'
+            f" {response['status_code']} {response['content_length']}"
         )
 
     def request_format(self, request: DefaultDict[str, str]) -> str:

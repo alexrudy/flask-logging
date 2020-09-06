@@ -54,7 +54,7 @@ def test_request_logging(client, watchlog):
     rid = str(uuid.uuid4())
 
     _ = client.get("/", headers={"X-Request-ID": rid})
-    record = watchlog.last("test-flask-logging.request")
+    record = watchlog.last("test-flask-logging.response")
     assert record.url == "/"
     assert record.method == "GET"
     assert record.response["status_code"] == 200
@@ -65,18 +65,18 @@ def test_request_log_jsonfmt(client, watchlog):
     """Logging should properly produce a nested JSON object with
     the custom JSON formatter"""
     _ = client.get("/")
-    record = watchlog.last("test-flask-logging.request")
+    record = watchlog.last("test-flask-logging.response")
 
     formatter = JSONFormatter()
     data = json.loads(formatter.format(record))
 
-    assert data["logger"]["name"] == "test-flask-logging.request"
+    assert data["logger"]["name"] == "test-flask-logging.response"
 
 
 def test_request_log_timing(client, watchlog):
     """Request logging should include request timing"""
     _ = client.get("/")
-    record = watchlog.last("test-flask-logging.request")
+    record = watchlog.last("test-flask-logging.response")
 
     duration = record.response["request_duration"]
 
