@@ -59,7 +59,7 @@ class RequestInformation(logging.Filter):
             log_record.remote_addr = request.remote_addr
 
         else:
-            log_record.request = None
+            log_record.request = {}
             log_record.url = None
             log_record.method = None
             log_record.remote_addr = None
