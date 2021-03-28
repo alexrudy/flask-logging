@@ -3,7 +3,6 @@ from typing import Any
 
 import pytest
 from flask import Flask
-
 from flask_logging.core import FlaskLogging
 from flask_logging.handlers.common import CommonLogFormat
 

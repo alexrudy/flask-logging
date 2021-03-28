@@ -6,7 +6,6 @@ from typing import Union
 
 import pytest
 import yaml
-
 from flask_logging.config import configure_logging
 from flask_logging.config import setup_null_handler
 

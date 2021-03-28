@@ -1,7 +1,6 @@
 import logging
 
 from conftest import LogWatcher
-
 from flask_logging.filters import log_metadata
 from flask_logging.filters import MetadataFilter
 

@@ -1,7 +1,6 @@
 import logging
 
 import pytest
-
 from flask_logging import ClickStyleFormatter
 from flask_logging import LogLevelDict
 

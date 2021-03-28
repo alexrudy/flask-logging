@@ -9,7 +9,6 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from flask import Flask
 from flask.testing import FlaskClient
-
 from flask_logging import FlaskLogging
 
 

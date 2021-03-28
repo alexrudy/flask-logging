@@ -1,7 +1,6 @@
 import pytest
 from flask import Flask
 from flask import Response
-
 from flask_logging.request_context import request_context_manger
 from flask_logging.request_context import RequestContextGenerator
 from flask_logging.request_context import RequestContextWrapper
@@ -55,7 +54,7 @@ def test_bad_response_context(app: Flask) -> None:
         sections.append("after-request")
         assert isinstance(response, Response)
 
-        return "hello"  # type: ignore
+        return "hello"
 
     request_dummy_context.init_app(app)
 
