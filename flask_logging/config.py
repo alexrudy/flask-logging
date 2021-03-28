@@ -3,6 +3,7 @@ import logging.config
 import os
 from pathlib import Path
 from typing import Dict
+from typing import Union
 
 import yaml
 
@@ -24,8 +25,9 @@ def configure_logging(cfg: Dict) -> None:
     logging.config.dictConfig(cfg)
 
 
-@configure_logging.register
-def _cl_filename(filename: os.PathLike) -> None:
+@configure_logging.register(os.PathLike)
+@configure_logging.register(str)
+def _cl_filename(filename: "Union[os.PathLike, str]") -> None:
     """Configure logging via a configuration in a YAML file"""
     with Path(filename).open("r") as s:
         cfg = yaml.safe_load(s)
