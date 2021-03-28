@@ -16,26 +16,15 @@ jobs:
           fetch-depth: 1
 
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.7
 
       - name: Install Poetry
         uses: snok/install-poetry@v1.1.2
 
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v1
-        id: cache
-        with:
-          path: ~/.virtualenvs
-          key: poetry-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
-          restore-keys: |
-            poetry-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
-
       - name: Set Poetry config
         run: |
-          poetry config virtualenvs.in-project false
-          poetry config virtualenvs.path ~/.virtualenvs
           poetry config pypi-token.pypi ${{ secrets.pypi_token }}
 
       - name: Install Dependencies
