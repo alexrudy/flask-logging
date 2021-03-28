@@ -5,6 +5,8 @@ from typing import cast
 from typing import Dict
 from typing import Generator
 from typing import Optional
+from typing import Tuple
+from typing import Union
 from weakref import WeakKeyDictionary
 
 from flask import current_app
@@ -13,7 +15,8 @@ from flask import Response
 
 __all__ = ["RequestContextWrapper", "request_context_manger"]
 
-RequestContextGenerator = Generator[Any, Response, Optional[Response]]
+IntoResponse = Union[Response, Tuple[str, int], str]
+RequestContextGenerator = Generator[Any, Response, Optional[IntoResponse]]
 RequestContextFunction = Callable[[], RequestContextGenerator]
 _ContextWrappers = Dict["RequestContextWrapper", RequestContextGenerator]
 
