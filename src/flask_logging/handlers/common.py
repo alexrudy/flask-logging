@@ -5,8 +5,8 @@ from typing import DefaultDict
 
 
 class CommonLogFormat(logging.Formatter):
-    """Python standard logging formatter which matches the common log format which is the default for apache webservers.
-    """
+    """Python standard logging formatter which matches the
+    common log format which is the default for apache webservers."""
 
     def format(self, record: logging.LogRecord) -> str:
         timestamp = format_apache_clf_timestamp(record.created)

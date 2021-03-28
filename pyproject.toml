@@ -5,7 +5,7 @@ description = "Logging tools for flask"
 authors = ["Alex Rudy <opensource@alexrudy.net>"]
 license = "MIT"
 packages = [
-    { include = "flask_logging" },
+    { include = "flask_logging", from = "src" },
 ]
 
 [tool.poetry.dependencies]

@@ -1,0 +1,9 @@
+[paths]
+source =
+    .
+    */site-packages
+
+[run]
+source =
+    flask_logging
+    tests
