@@ -17,7 +17,7 @@ RequestContextGenerator = Generator[Any, Response, Optional[Response]]
 RequestContextFunction = Callable[[], RequestContextGenerator]
 _ContextWrappers = Dict["RequestContextWrapper", RequestContextGenerator]
 
-EXTENSION_NAME = "flask_login.request_context"
+EXTENSION_NAME = "flask_logging.request_context"
 
 
 @dc.dataclass
