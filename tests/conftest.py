@@ -41,6 +41,9 @@ class LogWatcher:
 
     caplog: LogCaptureFixture
 
+    def any(self, logger: str) -> bool:
+        return any(record for record in self.caplog.records if record.name == logger)
+
     def last(self, logger: str) -> logging.LogRecord:
         for record in reversed(self.caplog.records):
             if record.name == logger:

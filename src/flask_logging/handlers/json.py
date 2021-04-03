@@ -19,6 +19,32 @@ from werkzeug.useragents import UserAgent
 __all__ = ["JSONLogWarning", "JSONFormatter"]
 
 
+LOG_RECORD_SCHEMA: Dict[str, Tuple[str, ...]] = {
+    "msg": ("message", "text"),
+    "args": ("message", "args"),
+    "asctime": ("timing", "ascii"),
+    "created": ("timing", "created"),
+    "msecs": ("timing", "msecs"),
+    "relativeCreated": ("timing", "relativeCreated"),
+    "pathname": ("python", "code", "pathname"),
+    "filename": ("python", "code", "filename"),
+    "module": ("python", "code", "module"),
+    "lineno": ("python", "code", "lineno"),
+    "funcName": ("python", "code", "funcname"),
+    "stack_info": ("python", "stack"),
+    "exc_info": ("python", "exc", "info"),
+    "exc_text": ("python", "exc", "text"),
+    "threadName": ("python", "thread", "name"),
+    "thread": ("python", "thread", "id"),
+    "process": ("python", "process", "pid"),
+    "processName": ("python", "process", "name"),
+    "name": ("logger", "name"),
+    "levelno": ("logger", "level", "number"),
+    "levelname": ("logger", "level", "name"),
+    "clevelname": ("logger", "level", "ansiname"),
+}
+
+
 class JSONLogWarning(Warning):
     """Warning used when an unmarshallable type is being logged"""
 
@@ -75,37 +101,32 @@ class JSONFormatter(logging.Formatter):
 
     def _convert_json_data(self, record: logging.LogRecord) -> Dict[str, Any]:
         data: Dict[str, Any] = {}
-        data.update(record.__dict__)
 
-        data["message"] = {"text": data.pop("msg"), "args": data.pop("args")}
+        raw = dict(record.__dict__)
 
-        data["timing"] = {
-            "ascii": data.pop("asctime", None),
-            "created": data.pop("created"),
-            "msecs": data.pop("msecs"),
-            "relativeCreated": data.pop("relativeCreated"),
-        }
-
-        data["python"] = {
-            "code": {
-                "path": data.pop("pathname"),
-                "filename": data.pop("filename"),
-                "module": data.pop("module"),
-                "lineno": data.pop("lineno"),
-                "funcName": data.pop("funcName"),
-            },
-            "stack": data.pop("stack_info"),
-            "exc": {"info": data.pop("exc_info"), "text": data.pop("exc_text")},
-            "thread": {"name": data.pop("threadName"), "id": data.pop("thread")},
-            "process": {"name": data.pop("processName"), "pid": data.pop("process")},
-        }
-        data["logger"] = {
-            "name": data.pop("name"),
-            "level": {
-                "number": data.pop("levelno"),
-                "name": data.pop("levelname"),
-                "ansiname": data.pop("clevelname", None),
-            },
-        }
+        for key, value in raw.items():
+            *parents, target_key = LOG_RECORD_SCHEMA.get(key, (key,))
+            target = data
+            for parent in parents:
+                target = target.setdefault(parent, {})
+            target[target_key] = value
 
         return data
+
+
+def makeLogRecordfromJson(data: str) -> logging.LogRecord:
+    raw = json.loads(data)
+    recordinfo = {**raw}
+
+    # This will duplicate standard keys – i.e. it doesn't
+    # remove the nested ones, but thats probably fine?
+    for key, position in LOG_RECORD_SCHEMA.items():
+        *parents, target_key = position
+        target = raw
+        for parent in parents:
+            target = target.get(parent, {})
+
+        if target_key in target:
+            recordinfo[key] = target[target_key]
+
+    return logging.makeLogRecord(recordinfo)
