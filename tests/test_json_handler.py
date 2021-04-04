@@ -4,6 +4,7 @@ import warnings
 
 from flask_logging.handlers.json import JSONFormatter
 from flask_logging.handlers.json import JSONLogWarning
+from flask_logging.handlers.json import makeLogRecordfromJson
 
 
 def test_request_log_jsonfmt(client, watchlog):
@@ -46,6 +47,20 @@ def test_log_jsonfmt_warning(record, recwarn):
     assert len(recwarn) == 1
     warning = recwarn.pop(JSONLogWarning)
     assert str(warning.message) == "Unable to marshal type <class 'object'> to JSON"
+
+
+def test_log_jsonfmt_roundtrip(record):
+    formatter = JSONFormatter()
+    data = formatter.format(record)
+
+    rt_record = makeLogRecordfromJson(data)
+
+    for key, expected in record.__dict__.items():
+        value = rt_record.__dict__[key]
+        if expected == ():
+            expected = []
+
+        assert value == expected
 
 
 class MockSchema:
