@@ -100,9 +100,11 @@ class RedisLogWatcher:
         # Set up the object.
         if isinstance(channel, list):
             channel, *rest = channel
-        obj = cls(url, channel, deserialize)
-        for channel in rest:
-            obj.subscribe(channel)
+            obj = cls(url, channel, deserialize)
+            for channel in rest:
+                obj.subscribe(channel)
+        else:
+            obj = cls(url, channel, deserialize)
         return obj
 
     def _redis_responder(self, msg):
