@@ -1,4 +1,5 @@
 import enum
+import itertools
 import logging.config
 from typing import Any
 from typing import Dict
@@ -21,8 +22,11 @@ LEVEL_STYLES: LogLevelDict[Dict[str, Any]] = LogLevelDict(
         logging.INFO: dict(fg="green"),
         logging.WARNING: dict(fg="yellow"),
         logging.ERROR: dict(fg="red"),
+        logging.CRITICAL: dict(fg="red"),
     }
 )
+
+COLORS = ["green", "yellow", "blue", "magenta", "cyan", "red"]
 
 
 class ClickStyleFormatter(logging.Formatter):
@@ -144,3 +148,36 @@ class ClickStreamHandler(logging.StreamHandler):
         handler = cls(level=level, mode=mode, split=split)
         handler.setFormatter(formatter)
         return handler
+
+
+class ComposeClickFormatter(logging.Formatter):
+    def __init__(self, datefmt: Optional[str] = None) -> None:
+        super().__init__(fmt=None, datefmt=datefmt)
+
+        self._colors = itertools.cycle(COLORS)
+        self._service_colors: Dict[str, str] = {}
+
+    def format(self, record: logging.LogRecord) -> str:
+        _ = super().format(record)
+
+        service = getattr(record, "compose", {}).get("service", "")
+        number = int(getattr(record, "compose", {}).get("container-number"))
+
+        if service not in self._service_colors:
+            self._service_colors[service] = next(self._colors)
+        service_color = self._service_colors[service]
+        c_service = click.style(service, fg=service_color)
+
+        level_style = LEVEL_STYLES[record.levelno]
+        c_level = click.style(f"{record.levelname:^11.11s}", **level_style)
+        name = record.name
+        container_info = f"{c_service:s}|{number:d}"
+
+        prefix = f"[{container_info}|{name:.20s}|{c_level}]"
+
+        record.asctime = self.formatTime(record, self.datefmt)
+        record.msg = self.formatMessage(record)
+
+        message = "{prefix} {message:s} [{asctime:s}]".format_map({**record.__dict__, "prefix": prefix})
+
+        return message
