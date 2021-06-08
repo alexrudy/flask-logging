@@ -53,7 +53,7 @@ def test_publish_to_redis(url, channel):
     assert message is not None
     assert message["channel"].decode("utf-8") == channel
     data = json.loads(message["data"])
-    assert data["message"]["text"] == "A test message we send"
+    assert data["message"] == "A test message we send"
 
 
 def test_listen_from_redis(watchlog, url, record, channel):

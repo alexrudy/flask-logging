@@ -20,8 +20,9 @@ __all__ = ["JSONLogWarning", "JSONFormatter"]
 
 
 LOG_RECORD_SCHEMA: Dict[str, Tuple[str, ...]] = {
-    "msg": ("message", "text"),
-    "args": ("message", "args"),
+    "formatted_msg": ("message",),
+    "msg": ("message_info", "text"),
+    "args": ("message_info", "args"),
     "asctime": ("timing", "ascii"),
     "created": ("timing", "created"),
     "msecs": ("timing", "msecs"),
@@ -92,8 +93,9 @@ class JSONFormatter(logging.Formatter):
         """
         ei = record.exc_info
         if ei:
-            _ = super().format(record)  # just to get traceback text into record.exc_text
+            formatted_msg = super().format(record)  # just to get traceback text into record.exc_text
             record.exc_info = None  # to avoid Unpickleable error
+            record.__dict__["formatted_msg"] = formatted_msg
         s = json.dumps(self._convert_json_data(record), sort_keys=True, cls=FlexJSONEncoder)
         if ei:
             record.exc_info = ei  # for next handler

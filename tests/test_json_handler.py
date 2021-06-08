@@ -17,6 +17,7 @@ def test_request_log_jsonfmt(client, watchlog):
     data = json.loads(formatter.format(record))
 
     assert data["logger"]["name"] == "test-flask-logging.response"
+    assert data["message"] == "200 OK"
 
 
 def test_log_jsonfmt_exc_info(watchlog):
