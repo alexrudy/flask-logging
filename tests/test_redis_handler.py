@@ -11,6 +11,7 @@ from flask_logging.handlers.redis import RedisLogWatcher
 from flask_logging.handlers.redis import RedisPublisher
 
 redis = pytest.importorskip("redis")
+pytestmark = pytest.mark.redis()
 
 
 @pytest.fixture(scope="module")
@@ -40,8 +41,8 @@ def test_publish_to_redis(url, channel):
     handler.setFormatter(JSONFormatter())
     logger.addHandler(handler)
 
-    for _ in range(10):
-        logger.info("A test message we send")
+    for i in range(10):
+        logger.info("%d) A test message we send", i)
         raw_message = pubsub.parse_response(block=False, timeout=1)
         print(raw_message)
         if raw_message is None:
@@ -53,7 +54,7 @@ def test_publish_to_redis(url, channel):
     assert message is not None
     assert message["channel"].decode("utf-8") == channel
     data = json.loads(message["data"])
-    assert data["message"]["text"] == "A test message we send"
+    assert "A test message we send" in data["message_info"]["text"]
 
 
 def test_listen_from_redis(watchlog, url, record, channel):

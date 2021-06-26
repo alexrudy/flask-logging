@@ -20,8 +20,9 @@ __all__ = ["JSONLogWarning", "JSONFormatter"]
 
 
 LOG_RECORD_SCHEMA: Dict[str, Tuple[str, ...]] = {
-    "msg": ("message", "text"),
-    "args": ("message", "args"),
+    "message": ("message",),
+    "msg": ("message_info", "text"),
+    "args": ("message_info", "args"),
     "asctime": ("timing", "ascii"),
     "created": ("timing", "created"),
     "msecs": ("timing", "msecs"),
@@ -118,9 +119,17 @@ def makeLogRecordfromJson(data: str) -> logging.LogRecord:
     raw = json.loads(data)
     recordinfo = {**raw}
 
+    if isinstance(raw.get("message", None), dict):
+        message = raw.pop("message")
+        if "message_info" not in raw:
+            raw["message_info"] = message
+        else:
+            raw["message_original"] = message
+
     # This will duplicate standard keys – i.e. it doesn't
     # remove the nested ones, but thats probably fine?
     for key, position in LOG_RECORD_SCHEMA.items():
+
         *parents, target_key = position
         target = raw
         for parent in parents:
@@ -128,5 +137,12 @@ def makeLogRecordfromJson(data: str) -> logging.LogRecord:
 
         if target_key in target:
             recordinfo[key] = target[target_key]
+
+    if "args" in recordinfo:
+        recordinfo["args"] = tuple(recordinfo["args"])
+
+    if "message" in recordinfo and "msg" not in recordinfo:
+        recordinfo["msg"] = recordinfo["message"]
+        recordinfo["args"] = None
 
     return logging.makeLogRecord(recordinfo)

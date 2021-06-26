@@ -17,6 +17,7 @@ def test_request_log_jsonfmt(client, watchlog):
     data = json.loads(formatter.format(record))
 
     assert data["logger"]["name"] == "test-flask-logging.response"
+    assert data["message"] == "200 OK"
 
 
 def test_log_jsonfmt_exc_info(watchlog):
@@ -57,8 +58,6 @@ def test_log_jsonfmt_roundtrip(record):
 
     for key, expected in record.__dict__.items():
         value = rt_record.__dict__[key]
-        if expected == ():
-            expected = []
 
         assert value == expected
 
