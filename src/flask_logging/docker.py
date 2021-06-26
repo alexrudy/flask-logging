@@ -81,8 +81,8 @@ class DockerComposeInformation(DockerInformation):
     """
 
     SCHEMA: Dict[Tuple[str, ...], Tuple[str, ...]] = {
-        ("compose", "project"): ("Labels", "com.docker.compose.project"),
-        ("compose", "service"): ("Labels", "com.docker.compose.service"),
-        ("compose", "container-number"): ("Labels", "com.docker.compose.container-number"),
-        ("compose", "config_files"): ("Labels", "com.docker.compose.project.config_files"),
+        ("compose", "project"): ("Config", "Labels", "com.docker.compose.project"),
+        ("compose", "service"): ("Config", "Labels", "com.docker.compose.service"),
+        ("compose", "container-number"): ("Config", "Labels", "com.docker.compose.container-number"),
+        ("compose", "config_files"): ("Config", "Labels", "com.docker.compose.project.config_files"),
     }

@@ -161,22 +161,39 @@ class ComposeClickFormatter(logging.Formatter):
         _ = super().format(record)
 
         service = getattr(record, "compose", {}).get("service", "")
-        number = int(getattr(record, "compose", {}).get("container-number"))
+        number = int(getattr(record, "compose", {}).get("container-number", 0))
 
-        if service not in self._service_colors:
-            self._service_colors[service] = next(self._colors)
-        service_color = self._service_colors[service]
-        c_service = click.style(service, fg=service_color)
+        prefix_parts = []
 
         level_style = LEVEL_STYLES[record.levelno]
         c_level = click.style(f"{record.levelname:^11.11s}", **level_style)
-        name = record.name
-        container_info = f"{c_service:s}|{number:d}"
 
-        prefix = f"[{container_info}|{name:.20s}|{c_level}]"
+        if service:
+            if service not in self._service_colors:
+                self._service_colors[service] = next(self._colors)
+            service_color = self._service_colors[service]
+            c_service = click.style(service, fg=service_color)
+            prefix_parts.append(c_service)
+
+        if number:
+            prefix_parts.append(f"{number:d}")
+
+        if len(record.name) > 20:
+            name = "..." + record.name[-17:]
+        else:
+            name = f"{record.name:20.20s}"
+        prefix_parts.append(name)
+        prefix_parts.append(c_level)
+
+        prefix = f"[{'|'.join(prefix_parts)}]"
 
         record.asctime = self.formatTime(record, self.datefmt)
-        record.msg = self.formatMessage(record)
+        formatted_message = self.formatMessage(record)
+
+        if not formatted_message:
+            print(record.__dict__)
+
+        record.message = formatted_message
 
         message = "{prefix} {message:s} [{asctime:s}]".format_map({**record.__dict__, "prefix": prefix})
 
