@@ -58,8 +58,6 @@ def test_log_jsonfmt_roundtrip(record):
 
     for key, expected in record.__dict__.items():
         value = rt_record.__dict__[key]
-        if expected == ():
-            expected = []
 
         assert value == expected
 
