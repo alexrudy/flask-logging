@@ -24,15 +24,17 @@ def hostname(monkeypatch):
 @pytest.fixture
 def docker_attributes(monkeypatch):
     attrs = {
-        "Labels": {
-            "com.docker.compose.config-hash": "b58ebad169e9a9d391977ee308067dbf4e1793d0e9497be3680fdc324ebf8320",
-            "com.docker.compose.container-number": "1",
-            "com.docker.compose.oneoff": "False",
-            "com.docker.compose.project": "flask-test-project",
-            "com.docker.compose.project.config_files": "docker-compose.yml,docker-compose.dev.yml",
-            "com.docker.compose.project.working_dir": "/path/to/working/directory",
-            "com.docker.compose.service": "flask-test-service",
-            "com.docker.compose.version": "1.28.5",
+        "Config": {
+            "Labels": {
+                "com.docker.compose.config-hash": "b58ebad169e9a9d391977ee308067dbf4e1793d0e9497be3680fdc324ebf8320",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "flask-test-project",
+                "com.docker.compose.project.config_files": "docker-compose.yml,docker-compose.dev.yml",
+                "com.docker.compose.project.working_dir": "/path/to/working/directory",
+                "com.docker.compose.service": "flask-test-service",
+                "com.docker.compose.version": "1.28.5",
+            },
         },
         "Id": "3bb7926f50475bd50084c156da269f3a4763f530d6f38c2310fc41d68b7a8d45",
         "Name": "/flask-test-project_flask-test-service_1",
