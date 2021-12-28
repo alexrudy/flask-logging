@@ -7,6 +7,6 @@ Flask-Logging provides a few utilities which enhance logs for flask applications
 ```
 pip install poetry
 poerty install --no-root
-docker run --rm -p6379:6379 redis &
+docker run -d --rm -p6379:6379 redis
 tox
 ```
