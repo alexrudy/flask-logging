@@ -138,7 +138,7 @@ def makeLogRecordfromJson(data: str) -> logging.LogRecord:
         if target_key in target:
             recordinfo[key] = target[target_key]
 
-    if "args" in recordinfo:
+    if "args" in recordinfo and isinstance(recordinfo["args"], list):
         recordinfo["args"] = tuple(recordinfo["args"])
 
     if "message" in recordinfo and "msg" not in recordinfo:
