@@ -65,7 +65,12 @@ class RedisLogWatcher:
 
     thread = None
 
-    def __init__(self, address: ClientArgs, channel: str, deserialize: Deserialize,) -> None:
+    def __init__(
+        self,
+        address: ClientArgs,
+        channel: str,
+        deserialize: Deserialize,
+    ) -> None:
         super().__init__()
         self.pubsub = _handle_redis_client_args(address).pubsub()
         self.subscribe(channel)
