@@ -512,6 +512,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-redis"
+version = "4.1.1"
+description = "Typing stubs for redis"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.7.4.3"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -593,7 +601,7 @@ redis = ["redis"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "752a1a1208cf6250fa1d8f31e7032e31337e60ba35fa9cf982749e5df21788d2"
+content-hash = "49147c23dc0d7aa34821cce3bb89b7f600c4a5960f71e00297593162d3953588"
 
 [metadata.files]
 appdirs = [
@@ -703,6 +711,7 @@ flake8 = [
 ]
 flake8-black = [
     {file = "flake8-black-0.2.1.tar.gz", hash = "sha256:f26651bc10db786c03f4093414f7c9ea982ed8a244cec323c984feeffdf4c118"},
+    {file = "flake8_black-0.2.1-py3-none-any.whl", hash = "sha256:941514149cb8b489cb17a4bb1cf18d84375db3b34381bb018de83509437931a0"},
 ]
 flake8-typing-imports = [
     {file = "flake8_typing_imports-1.10.1-py2.py3-none-any.whl", hash = "sha256:6a344423b3a14e7951e0e3e7fec78f2027e47f013a8208fced636f966e255fe9"},
@@ -993,6 +1002,10 @@ typed-ast = [
     {file = "typed_ast-1.4.2-cp39-cp39-win32.whl", hash = "sha256:cc7b98bf58167b7f2db91a4327da24fb93368838eb84a44c472283778fc2446b"},
     {file = "typed_ast-1.4.2-cp39-cp39-win_amd64.whl", hash = "sha256:7147e2a76c75f0f64c4319886e7639e490fee87c9d25cb1d4faef1d8cf83a440"},
     {file = "typed_ast-1.4.2.tar.gz", hash = "sha256:9fc0b3cb5d1720e7141d103cf4819aea239f7d136acf9ee4a69b047b7986175a"},
+]
+types-redis = [
+    {file = "types-redis-4.1.1.tar.gz", hash = "sha256:d867400f7ad81474cdd727cf0f4bf66f95b77ecdcf9987afc117c0b44864bb79"},
+    {file = "types_redis-4.1.1-py3-none-any.whl", hash = "sha256:b6684f05e25ed8ff3badef34493224e86db38465d37d942b9772f8d3fd856c2e"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
