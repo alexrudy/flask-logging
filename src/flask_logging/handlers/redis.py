@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -107,20 +108,26 @@ class RedisLogWatcher:
             obj = cls(url, channel, deserialize)
         return obj
 
-    def _redis_responder(self, msg):
+    def process_message(self, msg: Dict[str, Any]) -> None:
         """Given a Redis message, create the logrecord and handle it."""
-        record = self.deserialize(msg["data"])
-        logging.getLogger(record.name).handle(record)
+        try:
+            record = self.deserialize(msg["data"])
+        except Exception:
+            logging.getLogger("error").exception(
+                f"Error processing record:\n{msg['data']!r}\n{traceback.format_exc()}", exc_info=True
+            )
+        else:
+            logging.getLogger(record.name).handle(record)
 
-    def subscribe(self, name):
+    def subscribe(self, name: str) -> None:
         """Subscribe to an addtional channel."""
-        self.pubsub.subscribe(**{name: self._redis_responder})
+        self.pubsub.subscribe(**{name: self.process_message})
 
-    def start(self):
+    def start(self) -> None:
         """Start the log watcher."""
         self.thread = self.pubsub.run_in_thread(sleep_time=0.01)
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the log watcher"""
         if self.thread is not None:
             self.thread.stop()
